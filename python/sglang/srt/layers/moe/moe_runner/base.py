@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, TypeGuard
 
 import torch
 
@@ -9,6 +9,12 @@ from sglang.srt.layers.moe.token_dispatcher import (
     CombineInputFormat,
     DispatchOutputFormat,
 )
+
+if TYPE_CHECKING:
+    from sglang.srt.layers.moe.moe_runner.triton import (
+        TritonRunnerInput,
+        TritonRunnerOutput,
+    )
 
 
 @dataclass
@@ -45,11 +51,17 @@ class RunnerInput(ABC):
     def get_format(self) -> RunnerInputFormat:
         pass
 
+    def format_is_triton(self) -> TypeGuard[TritonRunnerInput]:
+        return self.get_format() == RunnerInputFormat.TRITON
+
 
 class RunnerOutput(ABC):
     @abstractmethod
     def get_format(self) -> RunnerOutputFormat:
         pass
+
+    def format_is_triton(self) -> TypeGuard[TritonRunnerOutput]:
+        return self.get_format() == RunnerOutputFormat.TRITON
 
 
 class MoeRunnerCore(ABC):
