@@ -30,11 +30,15 @@ class MoeA2ABackend(Enum):
 
 
 class MoeRunnerBackend(Enum):
+    AUTO = "auto"
     TRITON = "triton"
     TRITON_KERNEL = "triton_kernel"
     FLASHINFER = "flashinfer_trtllm"
     FLASHINFER_CUTLASS = "flashinfer_cutlass"
     FLASHINFER_MXFP4 = "flashinfer_mxfp4"
+
+    def is_auto(self):
+        return self == MoeRunnerBackend.AUTO
 
     def is_triton(self):
         return self == MoeRunnerBackend.TRITON
@@ -97,7 +101,7 @@ def initialize_moe_config(
     global TBO_TOKEN_DISTRIBUTION_THRESHOLD
 
     MOE_A2A_BACKEND = MoeA2ABackend(moe_a2a_backend)
-    MOE_RUNNER_BACKEND = MoeRunnerBackend(moe_runner_backend or "triton")
+    MOE_RUNNER_BACKEND = MoeRunnerBackend(moe_runner_backend)
     DEEPEP_MODE = DeepEPMode(deepep_mode)
     DEEPEP_CONFIG = deepep_config or ""
     IS_TBO_ENABLED = is_tbo_enabled
@@ -116,7 +120,7 @@ def get_moe_runner_backend() -> MoeRunnerBackend:
     global MOE_RUNNER_BACKEND
     if MOE_RUNNER_BACKEND is None:
         logger.warning("MOE_RUNNER_BACKEND is not initialized, using triton backend")
-        MOE_RUNNER_BACKEND = MoeRunnerBackend("triton")
+        MOE_RUNNER_BACKEND = MoeRunnerBackend("auto")
     return MOE_RUNNER_BACKEND
 
 

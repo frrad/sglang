@@ -174,16 +174,15 @@ class ServerArgs:
 
     # Expert parallelism
     ep_size: int = 1
-    moe_a2a_backend: Optional[Literal["deepep"]] = None
-    moe_runner_backend: Optional[
-        Literal[
-            "triton",
-            "triton_kernel",
-            "flashinfer_trtllm",
-            "flashinfer_cutlass",
-            "flashinfer_mxfp4",
-        ]
-    ] = None
+    moe_a2a_backend: Literal["standard", "deepep"] = "standard"
+    moe_runner_backend: Literal[
+        "auto",
+        "triton",
+        "triton_kernel",
+        "flashinfer_trtllm",
+        "flashinfer_cutlass",
+        "flashinfer_mxfp4",
+    ] = "auto"
     enable_flashinfer_allreduce_fusion: bool = False
     deepep_mode: Literal["auto", "normal", "low_latency"] = "auto"
     ep_num_redundant_experts: int = 0
@@ -578,7 +577,7 @@ class ServerArgs:
             self.ep_dispatch_algorithm = "static"
 
         if self.enable_eplb:
-            assert self.ep_size > 1 or self.moe_a2a_backend is not None
+            assert self.ep_size > 1
 
         if self.enable_expert_distribution_metrics and (
             self.expert_distribution_recorder_mode is None
@@ -1450,7 +1449,7 @@ class ServerArgs:
         parser.add_argument(
             "--moe-a2a-backend",
             type=str,
-            choices=["deepep"],
+            choices=["standard", "deepep"],
             default=ServerArgs.moe_a2a_backend,
             help="Choose the backend for MoE A2A.",
         )
@@ -1458,6 +1457,7 @@ class ServerArgs:
             "--moe-runner-backend",
             type=str,
             choices=[
+                "auto",
                 "triton",
                 "triton_kernel",
                 "flashinfer_trtllm",
